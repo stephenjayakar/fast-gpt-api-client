@@ -51,11 +51,10 @@ export const createSimpleCompletion = async (
 ): Promise<string> => {
   let completeText = "";
 
-  const completion = await openAIClient.createCompletion(
+  const completion = await openAIClient.createChatCompletion(
     {
-      model: "text-davinci-003",
-      prompt,
-      max_tokens: 1000,
+      model: "gpt-4-32k",
+      messages: [{ role: "user", content: prompt }],
       stream: true,
     },
     {
@@ -67,11 +66,13 @@ export const createSimpleCompletion = async (
     completion.data as unknown as IncomingMessage
   ))
     try {
-      // convert to the openai response type
-
       const parsed = JSON.parse(message) as CreateCompletionResponse;
 
-      const { text } = parsed.choices[0];
+      const choice = parsed.choices[0] as any;
+      const text = choice.delta.content;
+      if (text == undefined) {
+        continue;
+      }
       console.log(text);
 
       completeText += text;
