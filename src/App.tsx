@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Configuration, OpenAIApi } from "openai";
 import { createSimpleCompletion } from "./openaiWrapper";
 
-const createConfig = (apiKey: string) =>
-  new Configuration({
-    apiKey,
-  });
+const createAPIClient = (apiKey: string): OpenAIApi =>
+  new OpenAIApi(
+    new Configuration({
+      apiKey,
+    })
+  );
 
 function App() {
   const [apiKey, setApiKey] = useState("");
@@ -19,15 +21,13 @@ function App() {
   useEffect(() => {
     const storedApiKey = localStorage.getItem("API_KEY");
     if (storedApiKey) {
-      const configuration = createConfig(storedApiKey);
-      setOpenAIClient(new OpenAIApi(configuration));
+      setOpenAIClient(createAPIClient(storedApiKey));
     }
   }, []);
 
   const saveApiKeyAndSetupConfig = () => {
     localStorage.setItem("API_KEY", apiKey);
-    const configuration = createConfig(apiKey);
-    setOpenAIClient(new OpenAIApi(configuration));
+    setOpenAIClient(createAPIClient(apiKey));
   };
 
   const buttonPressed = async () => {
