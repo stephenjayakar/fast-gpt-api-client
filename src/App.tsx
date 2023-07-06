@@ -8,33 +8,32 @@ const createConfig = (apiKey: string) =>
 
 function App() {
   const [apiKey, setApiKey] = useState("");
-  const [configuration, setConfiguration] = useState<Configuration | null>(
-    null
-  );
+  const [openAIClient, setOpenAIClient] = useState<OpenAIApi | null>(null);
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState("");
-  const [authenticated, setAuthenticated] = useState(false);
   const [sendPreviousResponses, setSendPreviousResponses] = useState(false);
+
+  const authenticated = openAIClient !== null;
 
   useEffect(() => {
     const storedApiKey = localStorage.getItem("API_KEY");
     if (storedApiKey) {
-      setConfiguration(createConfig(storedApiKey));
-      setAuthenticated(true);
+      const configuration = createConfig(storedApiKey);
+      setOpenAIClient(new OpenAIApi(configuration));
     }
   }, []);
 
   const saveApiKeyAndSetupConfig = () => {
     localStorage.setItem("API_KEY", apiKey);
-    setConfiguration(createConfig(apiKey));
-    setAuthenticated(true);
+    const configuration = createConfig(apiKey);
+    setOpenAIClient(new OpenAIApi(configuration));
   };
 
-  const openai = configuration ? new OpenAIApi(configuration) : null;
+  // const openAIClient = configuration ? new OpenAIApi(configuration) : null;
 
   const completion = async (fullPrompt: string) => {
-    if (!openai) return null;
-    const chat_completion = await openai.createChatCompletion({
+    if (!openAIClient) return null;
+    const chat_completion = await openAIClient.createChatCompletion({
       model: "gpt-4-32k",
       messages: [{ role: "user", content: fullPrompt }],
     });
@@ -42,7 +41,7 @@ function App() {
   };
 
   const buttonPressed = async () => {
-    if (prompt && openai) {
+    if (prompt && openAIClient) {
       let fullPrompt = prompt;
       if (sendPreviousResponses) {
         fullPrompt = response + "\n" + fullPrompt;
