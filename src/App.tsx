@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Configuration, OpenAIApi } from "openai";
+import { createSimpleCompletion } from "./openaiWrapper";
 
 const createConfig = (apiKey: string) =>
   new Configuration({
@@ -29,27 +30,16 @@ function App() {
     setOpenAIClient(new OpenAIApi(configuration));
   };
 
-  // const openAIClient = configuration ? new OpenAIApi(configuration) : null;
-
-  const completion = async (fullPrompt: string) => {
-    if (!openAIClient) return null;
-    const chat_completion = await openAIClient.createChatCompletion({
-      model: "gpt-4-32k",
-      messages: [{ role: "user", content: fullPrompt }],
-    });
-    return chat_completion;
-  };
-
   const buttonPressed = async () => {
     if (prompt && openAIClient) {
       let fullPrompt = prompt;
       if (sendPreviousResponses) {
         fullPrompt = response + "\n" + fullPrompt;
       }
-      const res = await completion(prompt);
-      const content = res!.data.choices.map((c) => c.message!.content);
-      const messageText =
-        (response ? response + "\n" : "") + content.join("\n");
+      const messageText = await createSimpleCompletion(
+        openAIClient,
+        fullPrompt
+      );
       setResponse(messageText);
       console.log(messageText);
     }
