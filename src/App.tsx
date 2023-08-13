@@ -17,6 +17,13 @@ enum Sender {
   ChatGPT = "ChatGPT",
 }
 
+const globalStyles = {
+  fontFamily: "Arial",
+  fontSize: 18,
+  maxWidth: 500,
+  minWidth: 500,
+};
+
 function App() {
   const [apiKey, setApiKey] = useState("");
   const [openAIClient, setOpenAIClient] = useState<OpenAIApi | null>(null);
@@ -77,7 +84,7 @@ function App() {
 
   console.log(messages);
   return (
-    <div className="App">
+    <div style={globalStyles}>
       {!authenticated && (
         <>
           <input
@@ -105,7 +112,7 @@ function App() {
                 <div
                   style={{
                     backgroundColor:
-                      m.sender == Sender.Me ? "white" : "lightgrey",
+                      m.sender == Sender.ChatGPT ? "white" : "lightgrey",
                   }}
                 >
                   <span>
