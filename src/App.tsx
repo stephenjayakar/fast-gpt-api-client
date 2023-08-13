@@ -7,11 +7,22 @@ const createConfig = (apiKey: string) =>
     apiKey,
   });
 
+interface Message {
+  sender: Sender;
+  contents: string;
+}
+
+enum Sender {
+  Me = "Me",
+  ChatGPT = "ChatGPT",
+}
+
 function App() {
   const [apiKey, setApiKey] = useState("");
   const [openAIClient, setOpenAIClient] = useState<OpenAIApi | null>(null);
   const [prompt, setPrompt] = useState("");
-  const [response, setResponse] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  // const [response, setResponse] = useState("");
   const [sendPreviousResponses, setSendPreviousResponses] = useState(false);
 
   const authenticated = openAIClient !== null;
@@ -43,19 +54,28 @@ function App() {
 
   const buttonPressed = async () => {
     if (prompt && openAIClient) {
-      let fullPrompt = prompt;
-      if (sendPreviousResponses) {
-        fullPrompt = response + "\n" + fullPrompt;
-      }
+      // TODO: reimpl this
+      // let fullPrompt = prompt;
+      // if (sendPreviousResponses) {
+      //   fullPrompt = response + "\n" + fullPrompt;
+      // }
+
       const res = await completion(prompt);
-      const content = res!.data.choices.map((c) => c.message!.content);
-      const messageText =
-        (response ? response + "\n" : "") + content.join("\n");
-      setResponse(messageText);
-      console.log(messageText);
+      const content = res!.data.choices
+        .map((c) => c.message!.content)
+        .join("\n");
+      setMessages([
+        ...messages,
+        { sender: Sender.Me, contents: prompt },
+        { sender: Sender.ChatGPT, contents: content },
+      ]);
+      // const messageText =
+      //   (response ? response + "\n" : "") + content.join("\n");
+      // setResponse(messageText);
     }
   };
 
+  console.log(messages);
   return (
     <div className="App">
       {!authenticated && (
@@ -79,7 +99,22 @@ function App() {
               onChange={(e) => setSendPreviousResponses(e.target.checked)}
             />
           </span>
-          <ReactMarkdown>{response}</ReactMarkdown>
+          <div>
+            {messages.map((m) => {
+              return (
+                <div
+                  style={{
+                    backgroundColor:
+                      m.sender == Sender.Me ? "white" : "lightgrey",
+                  }}
+                >
+                  <span>
+                    {m.sender}: <ReactMarkdown>{m.contents}</ReactMarkdown>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
           <input type="text" onChange={(e) => setPrompt(e.target.value)} />
           <button onClick={buttonPressed}>Send</button>
         </>
