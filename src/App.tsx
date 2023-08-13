@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Configuration, OpenAIApi } from "openai";
+import ReactMarkdown from "react-markdown";
 
 const createConfig = (apiKey: string) =>
   new Configuration({
@@ -78,7 +79,7 @@ function App() {
               onChange={(e) => setSendPreviousResponses(e.target.checked)}
             />
           </span>
-          <p>{response}</p>
+          <ReactMarkdown>{response}</ReactMarkdown>
           <input type="text" onChange={(e) => setPrompt(e.target.value)} />
           <button onClick={buttonPressed}>Send</button>
         </>
